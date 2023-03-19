@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"evm-api/account"
+	"evm-api/transaction"
 	"evm-api/util"
 	"log"
 	"os"
@@ -55,9 +56,9 @@ func main() {
 	// 0x93ed284eaf3e0ae96b83c4dcb3a2a2b45acd8f6c638a1a354f272ff8d6f90fe4
 	// 0x5d3b42b79c37d7abee044cd47ae0e51e7e28d5d753c6dd07458f812894201b23
 	// 0x04fa6f2064697037717cfe7983d525ca6b13884492ed4f05c122b7a3d98ed747
-	// if err := transaction.QueryTxn(https, "0x93ed284eaf3e0ae96b83c4dcb3a2a2b45acd8f6c638a1a354f272ff8d6f90fe4"); err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	if err := transaction.QueryTxn(https, "0x22fc5e3c57b451dd61621ee2d07e5ae2e25afe2360726edfab0e97c98de0e1e0"); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// if err := transaction.SendETH(https); err != nil {
 	// 	log.Fatal(err.Error())

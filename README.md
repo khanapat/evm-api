@@ -25,6 +25,12 @@ docs:
 -   https://github.com/crytic/solc-select
 
 ```bash
+# abigen cli
+go get -u github.com/ethereum/go-ethereum
+cd $GOPATH/pkg/mod/github.com/ethereum/go-ethereum
+make
+make devtools # build abigen exec file in $GOPATH/bin
+
 # check cli
 solc --version
 

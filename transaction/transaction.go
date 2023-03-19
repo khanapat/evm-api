@@ -76,9 +76,9 @@ func QueryTxn(client *ethclient.Client, hash string) error {
 		fmt.Println("Status:", receipt.Status)
 		fmt.Println("BlockNumber:", receipt.BlockNumber)
 		fmt.Println("BlockHash: ", receipt.BlockHash)
-		fmt.Println("ContractAddress: ", receipt.ContractAddress) //
+		fmt.Println("ContractAddress: ", receipt.ContractAddress)
 		fmt.Println("TxHash: ", receipt.TxHash)
-		fmt.Println("Type: ", receipt.Type)
+		fmt.Println("Type: ", receipt.Type) // type-0 (legacy) | type-2 (EIP-1559)
 		fmt.Println("TxnIndex: ", receipt.TransactionIndex)
 		fmt.Println("PostState: ", receipt.PostState)
 		fmt.Println("Logs: ", receipt.Logs)
@@ -126,18 +126,19 @@ func QueryTxn(client *ethclient.Client, hash string) error {
 
 		fmt.Println("--------------")
 
-		msg, err := tx.AsMessage(types.LatestSignerForChainID(chainID), nil)
-		if err != nil {
-			return err
-		}
-		fmt.Println("From: ", msg.From().Hex())     // get from address
-		fmt.Println("GasFeeCap: ", msg.GasFeeCap()) // max gas fee
-		fmt.Println("GasPrice: ", msg.GasPrice())   // max gas fee
-		fmt.Println("GasTipCap: ", msg.GasTipCap()) // gas tip
-		fmt.Println("Gas: ", msg.Gas())
-		fmt.Println("Nonce: ", msg.Nonce())
-		fmt.Println("AccessList: ", msg.AccessList())
-		fmt.Println("Value:", msg.Value())
+		// in go-ethereum 1.11 remove this function
+		// msg, err := tx.AsMessage(types.LatestSignerForChainID(chainID), nil)
+		// if err != nil {
+		// 	return err
+		// }
+		// fmt.Println("From: ", msg.From().Hex())     // get from address
+		// fmt.Println("GasFeeCap: ", msg.GasFeeCap()) // max gas fee
+		// fmt.Println("GasPrice: ", msg.GasPrice())   // max gas fee
+		// fmt.Println("GasTipCap: ", msg.GasTipCap()) // gas tip
+		// fmt.Println("Gas: ", msg.Gas())
+		// fmt.Println("Nonce: ", msg.Nonce())
+		// fmt.Println("AccessList: ", msg.AccessList())
+		// fmt.Println("Value:", msg.Value())
 	}
 
 	return nil
