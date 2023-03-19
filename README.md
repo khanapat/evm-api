@@ -40,6 +40,7 @@ solc-select install 0.8.13 # install version
 solc-select use 0.8.13 # use version
 
 # generate abi
+solc --optimize --abi --bin --overwrite --include-path node_modules/ --base-path . ./artifacts/Store.sol -o ./artifacts/build # for import file (openzeppelin)
 solc --optimize --abi --bin ./artifacts/Store.sol -o ./artifacts/build
 
 # convert abi to go file
