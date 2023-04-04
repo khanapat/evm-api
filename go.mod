@@ -3,7 +3,7 @@ module evm-api
 go 1.19
 
 require (
-	github.com/ethereum/go-ethereum v1.11.4
+	github.com/ethereum/go-ethereum v1.11.5
 	github.com/joho/godotenv v1.4.0
 	github.com/shopspring/decimal v1.3.1
 	golang.org/x/crypto v0.7.0
@@ -33,7 +33,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
-	github.com/holiman/uint256 v1.2.0 // indirect
+	github.com/holiman/uint256 v1.2.2 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect

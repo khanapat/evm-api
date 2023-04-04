@@ -54,6 +54,17 @@ abigen --bin=./artifacts/build/Store.bin --abi=./artifacts/build/Store.abi --pkg
 -   https://github.com/etaaa/Golang-Ethereum-Personal-Sign
 -   https://github.com/storyicon/sigverify
 
+### code about crypto.Sign vs types.SignTx
+
+-   https://github.com/ethereum/go-ethereum/blob/master/crypto/signature_cgo.go#L55
+-   https://github.com/ethereum/go-ethereum/blob/master/core/types/transaction_signing.go#L94
+-   https://github.com/ethereum/go-ethereum/blob/master/core/types/transaction.go#L402
+
 ## send txn VS send raw txn
 
 -   https://stackoverflow.com/questions/50985798/difference-between-sendtransaction-and-sendrawtransaction-in-web3-py
+
+## EIP-712
+
+-   https://www.reddit.com/r/golang/comments/w2stgo/ethereum_signature_verification_in_golang_eip712/
+-   https://medium.com/alpineintel/issuing-and-verifying-eip-712-challenges-with-go-32635ca78aaf
