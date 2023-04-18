@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
-	"evm-api/store"
+	"evm-api/contract/store"
 	"fmt"
 	"math/big"
 	"os"

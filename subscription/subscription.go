@@ -2,7 +2,9 @@ package subscription
 
 import (
 	"context"
-	"evm-api/store"
+	"evm-api/contract/getset"
+	"evm-api/contract/store"
+	"evm-api/contract/token"
 	"fmt"
 	"log"
 	"math/big"
@@ -11,7 +13,9 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -23,7 +27,7 @@ type ItemSetEvent struct {
 }
 
 func SubscriptionBlock() {
-	ws, err := ethclient.DialContext(context.Background(), os.Getenv("WS_RPC_NETWORK"))
+	ws, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_MUMBAI_NETWORK"))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -33,6 +37,7 @@ func SubscriptionBlock() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
 	for {
 		select {
 		case err := <-sub.Err():
@@ -52,7 +57,7 @@ func SubscriptionBlock() {
 }
 
 func SubscriptionEvent() error {
-	ws, err := ethclient.DialContext(context.Background(), os.Getenv("WS_RPC_NETWORK"))
+	ws, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_MUMBAI_NETWORK"))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -65,6 +70,8 @@ func SubscriptionEvent() error {
 	if err != nil {
 		return err
 	}
+	defer sub.Unsubscribe()
+
 	for {
 		select {
 		case err := <-sub.Err():
@@ -73,6 +80,137 @@ func SubscriptionEvent() error {
 			fmt.Println(vLog) // pointer to event log
 		}
 	}
+}
+
+func SubscriptionEvents() error {
+	wss, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_MUMBAI_NETWORK"))
+	if err != nil {
+		return err
+	}
+
+	tokenAbi, err := abi.JSON(strings.NewReader(token.TokenABI))
+	if err != nil {
+		return err
+	}
+
+	tokenContractAddress := common.HexToAddress("0x65Dd393D0Fdd2866e37bDBC2F4ff46CCD5DfD82A")
+	tokenQuery := ethereum.FilterQuery{
+		Addresses: []common.Address{tokenContractAddress},
+	}
+
+	getsetAbi, err := abi.JSON(strings.NewReader(getset.GetsetABI))
+	if err != nil {
+		return err
+	}
+
+	getsetContractAddress := common.HexToAddress("0xB0fE721b5258Ef48AF16af3d435279100174B4AC")
+	getsetQuery := ethereum.FilterQuery{
+		Addresses: []common.Address{getsetContractAddress},
+	}
+	// header
+	headerLogs := make(chan *types.Header)
+	headerSub, err := wss.SubscribeNewHead(context.Background(), headerLogs)
+	defer headerSub.Unsubscribe()
+
+	// token
+	tokenLogs := make(chan types.Log)
+	tokenSub, err := wss.SubscribeFilterLogs(context.Background(), tokenQuery, tokenLogs)
+	if err != nil {
+		return err
+	}
+	defer tokenSub.Unsubscribe()
+
+	// getset
+	getsetSub, err := wss.SubscribeFilterLogs(context.Background(), getsetQuery, tokenLogs)
+	if err != nil {
+		return nil
+	}
+	defer getsetSub.Unsubscribe()
+
+	for {
+		select {
+		case err := <-headerSub.Err():
+			log.Fatal(err)
+		case err := <-tokenSub.Err():
+			log.Fatal(err)
+		case err := <-getsetSub.Err():
+			log.Fatal(err)
+		case hLog := <-headerLogs:
+			fmt.Println(hLog.Number)
+		case tLog := <-tokenLogs:
+			switch tLog.Topics[0].Hex() {
+			case crypto.Keccak256Hash([]byte("Transfer(address,address,uint256)")).Hex():
+				fmt.Println("topic:", tLog.Topics)
+				fmt.Println("data:", hexutil.Encode(tLog.Data))
+				fmt.Println("index:", tLog.Index)
+				fmt.Println("tx index:", tLog.TxIndex)
+				fmt.Println("removed", tLog.Removed)
+				fmt.Println(tLog)
+
+				transferSignature := []byte("Transfer(address,address,uint256)")
+				transferTopics := crypto.Keccak256Hash(transferSignature)
+				fmt.Println(transferTopics)
+
+				fmt.Println(common.TrimLeftZeroes(tLog.Topics[1].Bytes()))
+				fmt.Println(hexutil.Encode(common.TrimLeftZeroes(tLog.Topics[1].Bytes())))
+				fmt.Println(tLog.Topics[1].Hex())
+				fmt.Println(common.HexToAddress(tLog.Topics[2].Hex()))
+				fmt.Println(tLog.Topics[2].Hex())
+
+				var result token.TokenTransfer
+				if err := tokenAbi.UnpackIntoInterface(&result, "Transfer", tLog.Data); err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println(result)
+			case crypto.Keccak256Hash([]byte("SetA(uint256)")).Hex():
+				fmt.Println("topic:", tLog.Topics)
+				fmt.Println("data:", hexutil.Encode(tLog.Data))
+				fmt.Println("index:", tLog.Index)
+				fmt.Println("tx index:", tLog.TxIndex)
+				fmt.Println("removed", tLog.Removed)
+				fmt.Println(tLog)
+
+				setASignature := []byte("SetA(uint256)")
+				setATopics := crypto.Keccak256Hash(setASignature)
+				fmt.Println(setATopics)
+
+				var result getset.GetsetSetA
+				if err := getsetAbi.UnpackIntoInterface(&result, "SetA", tLog.Data); err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println(result)
+			}
+		}
+	}
+}
+
+func SubscriptionEventWABI() error {
+	wss, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_MUMBAI_NETWORK"))
+	if err != nil {
+		return err
+	}
+	getsetContractAddress := common.HexToAddress("0xB0fE721b5258Ef48AF16af3d435279100174B4AC")
+
+	instance, err := getset.NewGetset(getsetContractAddress, wss)
+	if err != nil {
+		return err
+	}
+	logs := make(chan *getset.GetsetSetA)
+	watchOpts := &bind.WatchOpts{Context: context.Background(), Start: nil}
+	sub, err := instance.WatchSetA(watchOpts, logs)
+	if err != nil {
+		return err
+	}
+	for {
+		select {
+		case err := <-sub.Err():
+			log.Fatal(err)
+		case log := <-logs:
+			fmt.Println(log)
+			fmt.Println(log.A)
+		}
+	}
+
 }
 
 func ReadEvent(client *ethclient.Client) error {
@@ -126,6 +264,71 @@ func ReadEvent(client *ethclient.Client) error {
 	eventSignature := []byte("ItemSet(bytes32,bytes32)")
 	hash := crypto.Keccak256Hash(eventSignature) // keccak256("ItemSet(bytes32,bytes32)")
 	fmt.Println("Topic ItemSet(bytes32,bytes32):", hash.Hex())
+
+	return nil
+}
+
+func ReadEvents() error {
+	https, err := ethclient.DialContext(context.Background(), os.Getenv("HTTPS_RPC_MUMBAI_NETWORK"))
+	if err != nil {
+		return err
+	}
+
+	getsetAbi, err := abi.JSON(strings.NewReader(getset.GetsetABI))
+	if err != nil {
+		return err
+	}
+
+	getsetContractAddress := common.HexToAddress("0xB0fE721b5258Ef48AF16af3d435279100174B4AC")
+	query := ethereum.FilterQuery{
+		FromBlock: big.NewInt(34517182),
+		ToBlock:   big.NewInt(34519009),
+		Addresses: []common.Address{getsetContractAddress},
+	}
+
+	logs, err := https.FilterLogs(context.Background(), query)
+	if err != nil {
+		return err
+	}
+
+	for _, vLog := range logs {
+		fmt.Printf("Log Block Number: %d\n", vLog.BlockNumber)
+
+		fmt.Println(vLog)
+		var result getset.GetsetSetA
+		if err := getsetAbi.UnpackIntoInterface(&result, "SetA", vLog.Data); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(result.A)
+	}
+
+	return nil
+}
+
+func ReadEventWABI() error {
+	https, err := ethclient.DialContext(context.Background(), os.Getenv("HTTPS_RPC_MUMBAI_NETWORK"))
+	if err != nil {
+		return err
+	}
+	getsetContractAddress := common.HexToAddress("0xB0fE721b5258Ef48AF16af3d435279100174B4AC")
+
+	instance, err := getset.NewGetset(getsetContractAddress, https)
+	if err != nil {
+		return err
+	}
+	end := uint64(34519009)
+	filterOpts := &bind.FilterOpts{Context: context.Background(), Start: 34517182, End: &end}
+	rows, err := instance.FilterSetA(filterOpts)
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		fmt.Printf("Log Block Number: %d\n", rows.Event.Raw.BlockNumber)
+		fmt.Println(rows.Event)
+		fmt.Println(rows.Event.A)
+	}
+	defer rows.Close()
 
 	return nil
 }
