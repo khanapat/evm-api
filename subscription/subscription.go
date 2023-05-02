@@ -83,7 +83,7 @@ func SubscriptionEvent() error {
 }
 
 func SubscriptionEvents() error {
-	wss, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_MUMBAI_NETWORK"))
+	wss, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_ARISE_TEST_NETWORK"))
 	if err != nil {
 		return err
 	}
@@ -107,6 +107,18 @@ func SubscriptionEvents() error {
 	getsetQuery := ethereum.FilterQuery{
 		Addresses: []common.Address{getsetContractAddress},
 	}
+
+	nftTransferAddresses := make([]common.Address, 0)
+	for _, v := range []string{"0xD7AFDF92c9db81414628A21fE59085C596F85a9D", "0xA6BE298A6f6363AdB579958F93ED078B961BD8b1", "0x1af0C121Ed05626ecF8c2d36bF12Fc435d20bE9f"} {
+		nftTransferAddresses = append(nftTransferAddresses, common.HexToAddress(v))
+	}
+	nftTransferSignature := []byte("Transfer(address,address,uint256)")
+	nftTransferTopics := [][]common.Hash{{crypto.Keccak256Hash(nftTransferSignature)}}
+	nftTransferQuery := ethereum.FilterQuery{
+		Addresses: nftTransferAddresses,
+		Topics:    nftTransferTopics,
+	}
+
 	// header
 	headerLogs := make(chan *types.Header)
 	headerSub, err := wss.SubscribeNewHead(context.Background(), headerLogs)
@@ -123,9 +135,17 @@ func SubscriptionEvents() error {
 	// getset
 	getsetSub, err := wss.SubscribeFilterLogs(context.Background(), getsetQuery, tokenLogs)
 	if err != nil {
-		return nil
+		return err
 	}
 	defer getsetSub.Unsubscribe()
+
+	// nft
+	transferNftLogs := make(chan types.Log)
+	transferNftSub, err := wss.SubscribeFilterLogs(context.Background(), nftTransferQuery, transferNftLogs)
+	if err != nil {
+		return err
+	}
+	defer transferNftSub.Unsubscribe()
 
 	for {
 		select {
@@ -134,6 +154,8 @@ func SubscriptionEvents() error {
 		case err := <-tokenSub.Err():
 			log.Fatal(err)
 		case err := <-getsetSub.Err():
+			log.Fatal(err)
+		case err := <-transferNftSub.Err():
 			log.Fatal(err)
 		case hLog := <-headerLogs:
 			fmt.Println(hLog.Number)
@@ -180,6 +202,8 @@ func SubscriptionEvents() error {
 				}
 				fmt.Println(result)
 			}
+		case nLog := <-transferNftLogs:
+			fmt.Println(nLog)
 		}
 	}
 }

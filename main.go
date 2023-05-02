@@ -27,17 +27,17 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// if err := subscription.SubscriptionEvents(); err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	if err := subscription.SubscriptionEvents(); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// if err := subscription.SubscriptionEventWABI(); err != nil {
 	// 	log.Fatal(err.Error())
 	// }
 
-	if err := subscription.ReadEventWABI(); err != nil {
-		log.Fatal(err.Error())
-	}
+	// if err := subscription.ReadEventWABI(); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	// util.Encode()
 
