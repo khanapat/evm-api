@@ -261,6 +261,7 @@ func SendERC20(client *ethclient.Client) error {
 	if err != nil {
 		return err
 	}
+
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
 	if err != nil {
 		return err
@@ -277,6 +278,89 @@ func SendERC20(client *ethclient.Client) error {
 	// 	return err
 	// }
 	// fmt.Printf("tx sent: %s\n", signedTx.Hash().Hex())
+
+	return nil
+}
+
+func RawTransaction(client *ethclient.Client) error {
+	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
+	if err != nil {
+		return err
+	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return errors.New("error casting public key to ECDSA")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	fmt.Println("Address:", fromAddress)
+
+	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Nonce:", nonce)
+
+	value := big.NewInt(1000000000) // in wei (1 geth)
+	gasLimit := uint64(21000)       // in units
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return err
+	}
+	fmt.Println("GasPrice:", gasPrice)
+	toAddress := common.HexToAddress("0xa9B6D99bA92D7d691c6EF4f49A1DC909822Cee46")
+
+	// legacy transaction
+	legacyTx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, nil)
+	chainID, err := client.NetworkID(context.Background())
+	if err != nil {
+		return err
+	}
+	legacySignedTx, err := types.SignTx(legacyTx, types.NewEIP155Signer(chainID), privateKey)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("legacy tx sent: %s\n", legacySignedTx.Hash().Hex())
+	c, _ := legacySignedTx.MarshalJSON()
+	fmt.Println("legacy c0:", string(c))
+
+	d, _ := legacySignedTx.MarshalBinary()
+	fmt.Println("legacy d2:", hexutil.Encode(d))
+	// or
+	// ts := types.Transactions{legacySignedTx}
+	// b := new(bytes.Buffer)
+	// ts.EncodeIndex(0, b)
+	// rawTxBytes := b.Bytes()
+	// rawTxHex := hex.EncodeToString(rawTxBytes)
+	// fmt.Println("legacy d2:", rawTxHex)
+
+	// dynamic fee transaction
+	tip := big.NewInt(2000000000) // 2 gwei
+
+	dynamicTx := types.NewTx(&types.DynamicFeeTx{
+		ChainID:   chainID,
+		Nonce:     nonce,
+		GasFeeCap: gasPrice,
+		GasTipCap: tip,
+		Gas:       gasLimit,
+		To:        &toAddress,
+		Value:     value,
+		Data:      nil,
+	})
+	dynamicSignedTx, err := types.SignTx(dynamicTx, types.LatestSignerForChainID(chainID), privateKey)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("dynamic tx sent: %s\n", dynamicSignedTx.Hash().Hex())
+	e, _ := dynamicSignedTx.MarshalJSON()
+	fmt.Println("dynamic e0:", string(e))
+
+	f, _ := dynamicSignedTx.MarshalBinary()
+	fmt.Println("dynamic f2:", hexutil.Encode(f))
 
 	return nil
 }

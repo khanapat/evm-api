@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"evm-api/account"
-	"evm-api/subscription"
+	"evm-api/transaction"
 	"log"
 	"os"
 
@@ -27,9 +27,9 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	if err := subscription.SubscriptionEvents(); err != nil {
-		log.Fatal(err.Error())
-	}
+	// if err := subscription.SubscriptionEvents(); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	// if err := subscription.SubscriptionEventWABI(); err != nil {
 	// 	log.Fatal(err.Error())
@@ -92,6 +92,10 @@ func main() {
 	// if err := transaction.SendERC20(https); err != nil {
 	// 	log.Fatal(err.Error())
 	// }
+
+	if err := transaction.RawTransaction(https); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// subscription.SubscriptionBlock()
 
