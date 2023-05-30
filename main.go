@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"evm-api/account"
-	"evm-api/transaction"
+	"evm-api/signature"
 	"log"
 	"os"
 
@@ -93,9 +93,9 @@ func main() {
 	// 	log.Fatal(err.Error())
 	// }
 
-	if err := transaction.RawTransaction(https); err != nil {
-		log.Fatal(err.Error())
-	}
+	// if err := transaction.RawTransaction(https); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	// subscription.SubscriptionBlock()
 
@@ -214,14 +214,14 @@ func main() {
 	//	}
 	//	fmt.Println("eip-712:", valid)
 
-	// hash, sign, err := signature.GenerateEIP712()
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	hash, sign, err := signature.GenerateEIP712()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
-	// if err := signature.VerifyEIP712(hash, sign); err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	if err := signature.VerifyEIP712(hash, sign); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// if err := signature.Test(); err != nil {
 	// 	log.Fatal(err.Error())

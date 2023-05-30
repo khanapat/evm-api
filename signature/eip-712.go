@@ -41,9 +41,9 @@ func GenerateEIP712() ([]byte, string, error) {
 		},
 	}
 
-	// hash, rawData, _ := apitypes.TypedDataAndHash(typedData)
-	// fmt.Println("Raw data:", []byte(rawData))
-	// fmt.Println("Hash:", common.BytesToHash(hash))
+	hash2, rawData2, _ := apitypes.TypedDataAndHash(typedData)
+	fmt.Println("Raw data:", hexutil.Encode([]byte(rawData2)))
+	fmt.Println("Hash:", common.BytesToHash(hash2))
 	// or
 	domainSeparator, err := typedData.HashStruct("EIP712Domain", typedData.Domain.Map())
 	if err != nil {
