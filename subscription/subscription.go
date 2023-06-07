@@ -83,7 +83,7 @@ func SubscriptionEvent() error {
 }
 
 func SubscriptionEvents() error {
-	wss, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_ARISE_TEST_NETWORK"))
+	wss, err := ethclient.DialContext(context.Background(), os.Getenv("WSS_RPC_MUMBAI_NETWORK"))
 	if err != nil {
 		return err
 	}
