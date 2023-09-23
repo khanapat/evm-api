@@ -105,7 +105,7 @@ func VerifyEIP712(hash []byte, signature string) error {
 	sig := make([]byte, len(signatureByte))
 	copy(sig, signatureByte)
 	if len(sig) != 65 {
-		return errors.New(fmt.Sprintf("invalid length of signature: %d", len(sig)))
+		return fmt.Errorf("invalid length of signature: %d", len(sig))
 	}
 	if sig[64] != 27 && sig[64] != 28 && sig[64] != 1 && sig[64] != 0 {
 		return errors.New("invalid signature type")

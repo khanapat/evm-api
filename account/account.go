@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math"
 	"math/big"
@@ -94,7 +93,7 @@ func GenerateKeystore(password string) error {
 // import keystore (generate new file in tmp & remove old file in wallets)
 func ImportKeystore(file string, password string) error {
 	ks := keystore.NewKeyStore("./tmp", keystore.StandardScryptN, keystore.StandardScryptP)
-	jsonBytes, err := ioutil.ReadFile(file)
+	jsonBytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}

@@ -9,7 +9,10 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strings"
 
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -121,30 +124,52 @@ func SetStore(client *ethclient.Client, instance *store.Store) error {
 	}
 	fmt.Println("Nonce:", nonce)
 
+	chainID, err := client.NetworkID(context.Background())
+	if err != nil {
+		return err
+	}
+
+	storeABI, err := abi.JSON(strings.NewReader(store.StoreABI))
+	if err != nil {
+		return err
+	}
+
+	key := [32]byte{}
+	value := [32]byte{}
+	copy(key[:], []byte("foo"))
+	copy(value[:], []byte("bar"))
+
+	data, err := storeABI.Pack("setItem", key, value)
+	if err != nil {
+		return err
+	}
+
+	toAddress := common.HexToAddress("0xC8A0FE1489cCF266c3011b49c38769f7ba7624C2")
+	gasLimit, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From:  fromAddress,
+		To:    &toAddress,
+		Value: big.NewInt(0),
+		Data:  data,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Println("GasLimit:", gasLimit)
+
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
 		return err
 	}
 	fmt.Println("GasPrice:", gasPrice)
 
-	chainID, err := client.NetworkID(context.Background())
-	if err != nil {
-		return err
-	}
-
 	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
 	if err != nil {
 		return err
 	}
 	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(0)     // in wei
-	auth.GasLimit = uint64(300000) // in units
+	auth.Value = big.NewInt(0) // in wei
+	auth.GasLimit = gasLimit   // in units
 	auth.GasPrice = gasPrice
-
-	key := [32]byte{}
-	value := [32]byte{}
-	copy(key[:], []byte("foo"))
-	copy(value[:], []byte("bar"))
 
 	// send txn
 	// tx, err := instance.SetItem(auth, key, value)
@@ -152,7 +177,16 @@ func SetStore(client *ethclient.Client, instance *store.Store) error {
 	// 	return err
 	// }
 
-	// fmt.Printf("tx sent: %s", tx.Hash().Hex())
+	// fmt.Printf("tx sent: %s\n", tx.Hash().Hex())
+
+	// receipt, err := bind.WaitMined(context.Background(), client, tx)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// fmt.Println("usage by txn:", receipt.GasUsed) // usage by txn
+	// fmt.Println("cumulative gas used:", receipt.CumulativeGasUsed)
+	// fmt.Println("effective gas price:", receipt.EffectiveGasPrice) // gas price
 
 	// call
 	result, err := instance.Items(nil, key) // nil or &bind.CallOpts{} is the same

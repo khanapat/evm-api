@@ -73,7 +73,7 @@ func QueryTxn(client *ethclient.Client, hash string) error {
 		}
 		fmt.Println("Gas Used:", receipt.GasUsed)
 		fmt.Println("Cumulative Gas Used:", receipt.CumulativeGasUsed)
-		fmt.Println("Status:", receipt.Status)
+		fmt.Println("Status:", receipt.Status) // 1 (success) | 0 (fail)
 		fmt.Println("BlockNumber:", receipt.BlockNumber)
 		fmt.Println("BlockHash: ", receipt.BlockHash)
 		fmt.Println("ContractAddress: ", receipt.ContractAddress)

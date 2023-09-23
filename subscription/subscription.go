@@ -122,6 +122,9 @@ func SubscriptionEvents() error {
 	// header
 	headerLogs := make(chan *types.Header)
 	headerSub, err := wss.SubscribeNewHead(context.Background(), headerLogs)
+	if err != nil {
+		return err
+	}
 	defer headerSub.Unsubscribe()
 
 	// token

@@ -68,3 +68,9 @@ abigen --bin=./artifacts/build/Store.bin --abi=./artifacts/build/Store.abi --pkg
 
 -   https://www.reddit.com/r/golang/comments/w2stgo/ethereum_signature_verification_in_golang_eip712/
 -   https://medium.com/alpineintel/issuing-and-verifying-eip-712-challenges-with-go-32635ca78aaf
+
+## bug
+
+go-ethereum v1.13.1 change ethclient toCallArg from arg["data"] to arg["input"]
+
+arise network using v1.12.2
