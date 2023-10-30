@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"evm-api/account"
-	"evm-api/smartcontract"
+	"evm-api/transaction"
 	"log"
 	"os"
 
@@ -81,13 +81,13 @@ func main() {
 	// 0x93ed284eaf3e0ae96b83c4dcb3a2a2b45acd8f6c638a1a354f272ff8d6f90fe4
 	// 0x5d3b42b79c37d7abee044cd47ae0e51e7e28d5d753c6dd07458f812894201b23
 	// 0x04fa6f2064697037717cfe7983d525ca6b13884492ed4f05c122b7a3d98ed747
-	// if err := transaction.QueryTxn(https, "0x7b19f0b2b7060ca94d6a2968024dddc4fffc14d3914794e22f1f19353434f616"); err != nil {
+	// if err := transaction.QueryTxn(https, "0x04fa6f2064697037717cfe7983d525ca6b13884492ed4f05c122b7a3d98ed747"); err != nil {
 	// 	log.Fatal(err.Error())
 	// }
 
-	// if err := transaction.SendETH(https); err != nil {
-	// 	log.Fatal(err.Error())
-	// }
+	if err := transaction.SendETH(https); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// if err := transaction.SendERC20(https); err != nil {
 	// 	log.Fatal(err.Error())
@@ -103,16 +103,16 @@ func main() {
 	// 	log.Fatal(err.Error())
 	// }
 
-	// goerli 0xC8A0FE1489cCF266c3011b49c38769f7ba7624C2
-	// arise 0xA7B645692E452CD2BF630c15b7303aeD71A3B71a
-	instance, err := smartcontract.Load(https, "0xC8A0FE1489cCF266c3011b49c38769f7ba7624C2")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	// goerli 0x78366072a1945C14B8b9aC50Fd9b0370dF2820D5
+	// arise 0xFffbAd3A0358728B2D38fd67F042b9C97a3266Bf
+	// instance, err := smartcontract.Load(https, "0xFffbAd3A0358728B2D38fd67F042b9C97a3266Bf")
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
-	if err := smartcontract.SetStore(https, instance); err != nil {
-		log.Fatal(err.Error())
-	}
+	// if err := smartcontract.SetStore(https, "0xFffbAd3A0358728B2D38fd67F042b9C97a3266Bf", instance); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	// if err := smartcontract.GetBytecode(https, "0x188992471F03D5bf1EaC66973fc3E7CA7ee5C0D3"); err != nil {
 	// 	log.Fatal(err.Error())

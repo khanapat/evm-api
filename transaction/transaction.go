@@ -159,11 +159,11 @@ func SendETH(client *ethclient.Client) error {
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 	fmt.Println("Address:", fromAddress)
 
-	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Nonce:", nonce)
+	// nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println("Nonce:", nonce)
 
 	value := big.NewInt(1000000000) // in wei (1 geth)
 	gasLimit := uint64(21000)       // in units
@@ -172,9 +172,12 @@ func SendETH(client *ethclient.Client) error {
 		return err
 	}
 	fmt.Println("GasPrice:", gasPrice)
+	if gasPrice.Cmp(big.NewInt(0)) == 0 {
+		gasPrice = big.NewInt(10000000000) // 10 gwei
+	}
 	toAddress := common.HexToAddress("0xa9B6D99bA92D7d691c6EF4f49A1DC909822Cee46")
 
-	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, nil)
+	tx := types.NewTransaction(1, toAddress, value, gasLimit, gasPrice, nil)
 	chainID, err := client.NetworkID(context.Background())
 	if err != nil {
 		return err
@@ -184,10 +187,17 @@ func SendETH(client *ethclient.Client) error {
 		return err
 	}
 
-	if err := client.SendTransaction(context.Background(), signedTx); err != nil {
-		return err
-	}
-	fmt.Printf("tx sent: %s\n", signedTx.Hash().Hex())
+	fmt.Println("Signed Tx:", signedTx.Hash().Hex())
+	e, _ := signedTx.MarshalJSON()
+	fmt.Println("signed tx string:", string(e))
+
+	f, _ := signedTx.MarshalBinary()
+	fmt.Println("raw signed tx:", hexutil.Encode(f))
+
+	// if err := client.SendTransaction(context.Background(), signedTx); err != nil {
+	// 	return err
+	// }
+	// fmt.Printf("tx sent: %s\n", signedTx.Hash().Hex())
 
 	return nil
 }
