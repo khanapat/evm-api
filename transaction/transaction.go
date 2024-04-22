@@ -21,6 +21,7 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
+// github.com/ethereum/go-ethereum v1.12.2
 func QueryBlocks(client *ethclient.Client, number int64) error {
 	// pattern 1
 	header, err := client.HeaderByNumber(context.Background(), nil) // nil for latest
@@ -28,7 +29,7 @@ func QueryBlocks(client *ethclient.Client, number int64) error {
 		return err
 	}
 
-	fmt.Println("block numer:", header.Number.String())
+	fmt.Println("latest block number:", header.Number.String())
 
 	// pattern 2
 	blockNumber := big.NewInt(number)
@@ -40,11 +41,20 @@ func QueryBlocks(client *ethclient.Client, number int64) error {
 	fmt.Println("block number:", block.Number().Uint64())         // 5671744
 	fmt.Println("block timestamp:", block.Time())                 // 1527211625
 	fmt.Println("block difficulty:", block.Difficulty().Uint64()) // 3217000136609065
-	fmt.Println("block hash:", block.Hash().Hex())                // 0x9e8751ebb5069389b855bba72d94902cc385042661498a415979b7b6ee9ba4b9	fmt.Println("number of txn in block:", len(block.Transactions()))
+	fmt.Println("block gas used:", block.GasUsed())
+	fmt.Println("block size", block.Size())
+	fmt.Println("block hash:", block.Hash().Hex()) // 0x9e8751ebb5069389b855bba72d94902cc385042661498a415979b7b6ee9ba4b9	fmt.Println("number of txn in block:", len(block.Transactions()))
+	fmt.Println("block header hash:", block.Header().Hash())
+	fmt.Println("block root:", block.Root())
+	fmt.Println("block tx hash:", block.TxHash())
+	fmt.Println("block uncle hash:", block.UncleHash())
+	fmt.Println("block receipt hash:", block.Header().ReceiptHash)
+
+	fmt.Println("parent block hash:", block.ParentHash().Hex())
 
 	count, err := client.TransactionCount(context.Background(), block.Hash())
 	if err != nil {
-		return nil
+		return err
 	}
 
 	fmt.Println("number of txn in block:", count)

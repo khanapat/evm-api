@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -19,6 +20,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/robfig/cron/v3"
 )
 
 type ItemSetEvent struct {
@@ -358,4 +360,24 @@ func ReadEventWABI() error {
 	defer rows.Close()
 
 	return nil
+}
+
+func PullingInterval() {
+	c := cron.New(cron.WithLocation(time.Local))
+	_, _ = c.AddFunc("* * * * *", func() {
+		fmt.Println("[Job 1]Every minute job")
+	})
+
+	_, _ = c.AddFunc("*/2 * * * *", func() {
+		fmt.Println("[Job 2]Every two minutes job")
+	})
+
+	_, _ = c.AddFunc("@hourly", func() {
+		fmt.Println("Every hour")
+	})
+
+	fmt.Printf("Cron Info: %+v\n", c.Entries())
+	c.Start()
+
+	time.Sleep(2 * time.Hour)
 }

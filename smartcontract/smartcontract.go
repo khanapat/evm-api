@@ -5,7 +5,10 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
+	gashapon "evm-api/contract/gasahpon"
 	"evm-api/contract/store"
+	"evm-api/contract/token"
+	"evm-api/util"
 	"fmt"
 	"math/big"
 	"os"
@@ -291,6 +294,104 @@ func SetStore(client *ethclient.Client, contract string, instance *store.Store) 
 	fmt.Println("items4:", result4)
 
 	// fmt.Println("items:", string(result[:]))
+
+	return nil
+}
+
+const (
+	contractAddress string = "0xB1AD4CDcC20B2903435fa176Cc1A87a006E8c923"
+	targetAddress   string = "0x9566759b35C6A845519411f6Eba26C7CB7b20C49"
+)
+
+func GetBalance(client *ethclient.Client) error {
+	erc20, err := token.NewToken(common.HexToAddress(contractAddress), client)
+	if err != nil {
+		return err
+	}
+
+	bal, err := erc20.BalanceOf(nil, common.HexToAddress(targetAddress))
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Balance of %s: %s\n", targetAddress, util.ToDecimal(bal, 18))
+
+	return nil
+}
+
+const erc20ABI string = `[{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
+
+func GetBalanceFromCallContract(client *ethclient.Client) error {
+	contractAddress := common.HexToAddress("0xB1AD4CDcC20B2903435fa176Cc1A87a006E8c923")
+	targetAddress := common.HexToAddress("0x9566759b35C6A845519411f6Eba26C7CB7b20C49")
+
+	erc20Abi, err := abi.JSON(strings.NewReader(erc20ABI))
+	if err != nil {
+		return err
+	}
+
+	callData, err := erc20Abi.Pack("balanceOf", targetAddress)
+	if err != nil {
+		return err
+	}
+
+	msg := ethereum.CallMsg{
+		To:   &contractAddress,
+		Data: callData,
+	}
+
+	result, err := client.CallContract(context.Background(), msg, nil)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(hexutil.Encode(result))
+
+	balance, err := erc20Abi.Unpack("balanceOf", result)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Balance of %s: %s\n", targetAddress.Hex(), util.ToDecimal(balance[0], 18))
+	return nil
+}
+
+func RevealGashapon(client *ethclient.Client) error {
+	gashaponContract, err := gashapon.NewGashapon(common.HexToAddress("0x182F251Ae6f7C2B2101A153326c8F35dB0A26861"), client)
+	if err != nil {
+		return err
+	}
+
+	stringTy, err := abi.NewType("string", "string", nil)
+	if err != nil {
+		return err
+	}
+
+	arguments := abi.Arguments{
+		{
+			Type: stringTy,
+		},
+	}
+
+	bytes, err := arguments.Pack("TEST7")
+	if err != nil {
+		return err
+	}
+
+	hashedSecretBytes := crypto.Keccak256Hash(bytes)
+
+	isValid, err := gashaponContract.CheckHashedSecret(nil, hashedSecretBytes, "TEST7")
+	if err != nil {
+		return err
+	}
+	fmt.Println("isValid:", isValid)
+
+	a := big.NewInt(16424421)
+	isExpire, err := gashaponContract.CheckBlockhashExpire(nil, a)
+	if err != nil {
+		return err
+	}
+	fmt.Println("isExpire:", isExpire)
 
 	return nil
 }

@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"crypto/ecdsa"
+	"evm-api/util"
 	"fmt"
 	"log"
 	"math"
@@ -14,8 +15,63 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
+	"github.com/tyler-smith/go-bip32"
+	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/sha3"
 )
+
+// https://idhww.medium.com/making-your-own-safety-cold-ethereum-hd-wallet-using-golang-b6f34b359c8f
+// https://github.com/topics/mnemonic?l=go
+func GenerateMnemonic() error {
+	// Generate a mnemonic for memorization or user-friendly seeds
+	entropy, err := bip39.NewEntropy(128)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("entropy:", hexutil.Encode(entropy))
+
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("mnemonic:", mnemonic)
+
+	// Generate a Bip32 HD wallet for the mnemonic and a user supplied password
+	seed := bip39.NewSeed(mnemonic, "")
+
+	masterKey, _ := bip32.NewMasterKey(seed)
+	publicKey := masterKey.PublicKey()
+
+	fmt.Println("Master private key:", masterKey)
+	fmt.Println("Master public key:", publicKey)
+
+	wallet, err := hdwallet.NewFromMnemonic(mnemonic)
+	if err != nil {
+		return err
+	}
+
+	// Ethereum default path is m/44'/60'/0'/0/0
+	path := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
+	account, err := wallet.Derive(path, false)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Account1:", account.Address.Hex()) // account 1
+
+	path = hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/1")
+	account, err = wallet.Derive(path, false)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Account2:", account.Address.Hex()) // account 2
+
+	return nil
+}
 
 func GenerateAccount() error {
 	privateKey, err := crypto.GenerateKey()
@@ -73,6 +129,25 @@ func Balance(client *ethclient.Client, address string) error {
 
 	fmt.Println("balance(wei):", balanceInWei)
 	fmt.Println("balance(eth):", balanceInEth)
+
+	// https://github.com/ethereum/go-ethereum/issues/21221
+	amount, _ := new(big.Int).SetString("2775176240359883548376", 10)
+	fmt.Println("amount(wei):", amount)
+	fmt.Println("amount(eth):", util.WeiToEther(amount))
+
+	fmt.Println("Discount 30%")
+	dAmountInWei := new(big.Int)
+	dAmountInWei.Mul(amount, big.NewInt(70))
+	dAmountInWei.Div(dAmountInWei, big.NewInt(100))
+	fmt.Println("discount amount(wei):", dAmountInWei)
+	fmt.Println("discount amount(eth):", util.WeiToEther(dAmountInWei))
+
+	dString := new(big.Float)
+	dString.SetString(dAmountInWei.String())
+	fmt.Println("discount set string", dString)
+	dInt := new(big.Float)
+	dInt.SetInt(dAmountInWei)
+	fmt.Println("discount set int (more precise)", dInt)
 
 	return nil
 }

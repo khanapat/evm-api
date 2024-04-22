@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"evm-api/account"
-	"evm-api/transaction"
 	"log"
 	"os"
 
@@ -26,6 +25,14 @@ func main() {
 	if err := account.Balance(https, "0xc083EB69aa7215f4AFa7a22dcbfCC1a33999371C"); err != nil {
 		log.Fatal(err.Error())
 	}
+
+	// if err := account.GenerateMnemonic(); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
+
+	// if err := smartcontract.RevealGashapon(https); err != nil {
+	// 	log.Fatal("Reveal:", err.Error())
+	// }
 
 	// if err := subscription.SubscriptionEvents(); err != nil {
 	// 	log.Fatal(err.Error())
@@ -72,7 +79,7 @@ func main() {
 	// 	log.Fatal(err.Error())
 	// }
 
-	// if err := transaction.QueryBlocks(https, 7908442); err != nil {
+	// if err := transaction.QueryBlocks(https, 15675140); err != nil {
 	// 	log.Fatal(err.Error())
 	// }
 
@@ -85,9 +92,9 @@ func main() {
 	// 	log.Fatal(err.Error())
 	// }
 
-	if err := transaction.SendETH(https); err != nil {
-		log.Fatal(err.Error())
-	}
+	// if err := transaction.SendETH(https); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	// if err := transaction.SendERC20(https); err != nil {
 	// 	log.Fatal(err.Error())
@@ -125,6 +132,12 @@ func main() {
 	// if err := subscription.ReadEvent(https); err != nil {
 	// 	log.Fatal(err.Error())
 	// }
+
+	// cronjob
+	// subscription.PullingInterval()
+
+	// get erc20 balance
+	// smartcontract.GetBalance(https)
 
 	// generate & verify signature
 	// 	sign, err := signature.GenerateSignature([]byte("bobo"))

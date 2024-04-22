@@ -74,3 +74,10 @@ abigen --bin=./artifacts/build/Store.bin --abi=./artifacts/build/Store.abi --pkg
 go-ethereum v1.13.1 change ethclient toCallArg from arg["data"] to arg["input"]
 
 arise network using v1.12.2
+
+## cheatsheet
+
+| solidity               | ethers.js                                       | go                                                 |
+| ---------------------- | ----------------------------------------------- | -------------------------------------------------- |
+| keccak256 + abi.encode | utils.keccak256 + utils.defaultAbiCoder.encode  | abi.Arguments.Pack + Encode + crypto.Keccak256Hash |
+| keccak256              | utils.keccak256 + utils.toUtf8Bytes or utils.id | crypto.Keccak256Hash                               |

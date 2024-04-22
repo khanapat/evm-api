@@ -28,3 +28,6 @@ func Encode() {
 	b := []byte{}
 	fmt.Println("bytes to hex:", b, hexutil.Bytes(b)) // bytes to hex
 }
+
+// solidity vs ethers.js vs go
+// ethers.utils.id vs ethers.utils.keccak256(ethers.utils.toUtf8Bytes()) vs go?

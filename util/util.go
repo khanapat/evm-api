@@ -1,13 +1,16 @@
 package util
 
 import (
+	"fmt"
 	"math/big"
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/shopspring/decimal"
 )
 
@@ -39,6 +42,27 @@ func IsZeroAddress(iaddress interface{}) bool {
 	zeroAddressBytes := common.FromHex("0x0000000000000000000000000000000000000000")
 	addressBytes := address.Bytes()
 	return reflect.DeepEqual(addressBytes, zeroAddressBytes)
+}
+
+// https://github.com/ethereum/go-ethereum/issues/21221#issuecomment-805852059
+func WeiToEther(wei *big.Int) *big.Float {
+	f := new(big.Float)
+	f.SetPrec(236)
+	f.SetMode(big.ToNearestEven)
+	fWei := new(big.Float)
+	fWei.SetPrec(236)
+	fWei.SetMode(big.ToNearestEven)
+
+	return f.Quo(fWei.SetInt(wei), big.NewFloat(params.Ether))
+}
+
+func EtherToWei(eth *big.Float) *big.Int {
+	truncInt, _ := eth.Int(nil)
+	truncInt = new(big.Int).Mul(truncInt, big.NewInt(params.Ether))
+	fracStr := strings.Split(fmt.Sprintf("%.18f", eth), ".")[1]
+	fracStr += strings.Repeat("0", 18-len(fracStr))
+	fracInt, _ := new(big.Int).SetString(fracStr, 10)
+	return new(big.Int).Add(truncInt, fracInt)
 }
 
 // ToDecimal wei to decimals
