@@ -154,6 +154,54 @@ func QueryTxn(client *ethclient.Client, hash string) error {
 	return nil
 }
 
+func EstimateGas(client *ethclient.Client) error {
+	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
+	if err != nil {
+		return err
+	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return errors.New("error casting public key to ECDSA")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	fmt.Println("Address:", fromAddress)
+
+	pendingNonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Pending Nonce:", pendingNonce) // use this (current nonce + pending txn)
+
+	nonce, err := client.NonceAt(context.Background(), fromAddress, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Current Nonce:", nonce)
+
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return err
+	}
+	fmt.Println("GasPrice:", gasPrice)
+
+	to := common.HexToAddress("0xa9B6D99bA92D7d691c6EF4f49A1DC909822Cee46")
+	gasLimit, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From:  fromAddress,
+		To:    &to,
+		Value: big.NewInt(1000000000),
+		Data:  nil,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Println("GasLimit:", gasLimit)
+
+	return nil
+}
+
 func SendETH(client *ethclient.Client) error {
 	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
 	if err != nil {

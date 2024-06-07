@@ -95,6 +95,20 @@ func SubscriptionEvents() error {
 		return err
 	}
 
+	// filter address
+	// contractAddress := common.HexToAddress("0x402349046AA8F7e6fC355E7c8B4654D3e6967FD9")
+	// toAddress := common.LeftPadBytes(common.HexToAddress("0xa9B6D99bA92D7d691c6EF4f49A1DC909822Cee46").Bytes(), 32)
+	// fmt.Println(toAddress, common.HexToHash(hexutil.Encode(toAddress)))
+
+	// // Create a filter query
+	// query := ethereum.FilterQuery{
+	// 	Addresses: []common.Address{contractAddress},
+	// 	Topics: [][]common.Hash{
+	// 		{crypto.Keccak256Hash([]byte("Transfer(address,address,uint256)"))},
+	// 		{},
+	// 		{common.HexToHash(hexutil.Encode(toAddress))},
+	// 	},
+	// }
 	tokenContractAddress := common.HexToAddress("0x65Dd393D0Fdd2866e37bDBC2F4ff46CCD5DfD82A")
 	tokenQuery := ethereum.FilterQuery{
 		Addresses: []common.Address{tokenContractAddress},
@@ -114,7 +128,7 @@ func SubscriptionEvents() error {
 	for _, v := range []string{"0xD7AFDF92c9db81414628A21fE59085C596F85a9D", "0xA6BE298A6f6363AdB579958F93ED078B961BD8b1", "0x1af0C121Ed05626ecF8c2d36bF12Fc435d20bE9f"} {
 		nftTransferAddresses = append(nftTransferAddresses, common.HexToAddress(v))
 	}
-	nftTransferSignature := []byte("Transfer(address,address,uint256)")
+	nftTransferSignature := []byte("Transfer(address,address,uint256)") // whitespace is important
 	nftTransferTopics := [][]common.Hash{{crypto.Keccak256Hash(nftTransferSignature)}}
 	nftTransferQuery := ethereum.FilterQuery{
 		Addresses: nftTransferAddresses,

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"evm-api/account"
+	"evm-api/transaction"
 	"log"
 	"os"
 
@@ -23,6 +24,10 @@ func main() {
 	}
 
 	if err := account.Balance(https, "0xc083EB69aa7215f4AFa7a22dcbfCC1a33999371C"); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if err := transaction.EstimateGas(https); err != nil {
 		log.Fatal(err.Error())
 	}
 

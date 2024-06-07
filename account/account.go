@@ -149,6 +149,21 @@ func Balance(client *ethclient.Client, address string) error {
 	dInt.SetInt(dAmountInWei)
 	fmt.Println("discount set int (more precise)", dInt)
 
+	// https://stackoverflow.com/questions/46374304/dealing-with-floating-point-number-precision-in-go-arithmetic
+	// // const prec = 200
+	// init := big.NewFloat(4.0).SetPrec(200)
+	// // init, _ := new(big.Float).SetString("4.0")
+	// result1 := new(big.Float)
+	// result1.Mul(init, big.NewFloat(5)).Quo(result1, big.NewFloat(100))
+	// fmt.Println(result1)
+
+	// result2 := new(big.Float)
+	// result2.Mul(init, big.NewFloat(10)).Quo(result2, big.NewFloat(100))
+	// fmt.Println(result2)
+
+	// fmt.Println(init.Add(init, result1).Float64())
+	// fmt.Println(init.Add(init, result2).Float64())
+
 	return nil
 }
 
