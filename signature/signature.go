@@ -13,10 +13,19 @@ import (
 )
 
 func GenerateSignature(data []byte) (string, error) {
+	fmt.Println("===Generate Signature===")
+
 	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
 	if err != nil {
 		return "", err
 	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return "", err
+	}
+	fmt.Println("Address:", crypto.PubkeyToAddress(*publicKeyECDSA).Hex())
 
 	hash := crypto.Keccak256Hash(data) // keccak256 + hash
 	fmt.Println("Hash:", hash.Hex())
@@ -39,10 +48,19 @@ func GenerateSignature(data []byte) (string, error) {
 }
 
 func GenerateSignatureWihEIP191(message string) (string, error) {
+	fmt.Println("===Generate Signature with EIP191===")
+
 	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
 	if err != nil {
 		return "", err
 	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return "", err
+	}
+	fmt.Println("Address:", crypto.PubkeyToAddress(*publicKeyECDSA).Hex())
 
 	// hash, fullMessage := accounts.TextAndHash([]byte(message))
 	// fmt.Println("Hash:", hash)
@@ -50,6 +68,9 @@ func GenerateSignatureWihEIP191(message string) (string, error) {
 	// or
 	fullMessage := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)
 	hash := crypto.Keccak256Hash([]byte(fullMessage)) // keccak256 + hash
+
+	fmt.Println("Data:", hexutil.Encode([]byte(message)))
+
 	fmt.Println("Hash:", hash.Hex())
 	fmt.Println("FullMessage:", fullMessage)
 
@@ -71,6 +92,8 @@ func GenerateSignatureWihEIP191(message string) (string, error) {
 }
 
 func VerifySignature(data []byte, signature string) error {
+	fmt.Println("===Verify Signature===")
+
 	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
 	if err != nil {
 		return err
@@ -120,10 +143,14 @@ func VerifySignature(data []byte, signature string) error {
 	matches3 := crypto.VerifySignature(publicKeyBytes, hash.Bytes(), signatureNoRecoverID)
 	fmt.Println("matches pattern3:", matches3)
 
+	fmt.Println("address:", crypto.PubkeyToAddress(*sigPublicKeyECDSA))
+
 	return nil
 }
 
 func VerifySignatureWithEIP191(message string, signature string) error {
+	fmt.Println("===Verify Signature with EIP191===")
+
 	privateKey, err := crypto.HexToECDSA(os.Getenv("PRIVATE_KEY"))
 	if err != nil {
 		return err
@@ -177,6 +204,8 @@ func VerifySignatureWithEIP191(message string, signature string) error {
 	signatureNoRecoverID := signatureByte[:len(signatureByte)-1] // remove recovery ID
 	matches3 := crypto.VerifySignature(publicKeyBytes, hash.Bytes(), signatureNoRecoverID)
 	fmt.Println("matches pattern3:", matches3)
+
+	fmt.Println("address:", crypto.PubkeyToAddress(*sigPublicKeyECDSA))
 
 	return nil
 }

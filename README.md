@@ -72,7 +72,7 @@ abigen --bin=./artifacts/build/Store.bin --abi=./artifacts/build/Store.abi --pkg
 ## bug
 
 go-ethereum v1.13.1 change ethclient toCallArg from arg["data"] to arg["input"]
-
+error -> Execution reverted
 arise network using v1.12.2
 
 ## cheatsheet

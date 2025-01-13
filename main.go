@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"evm-api/account"
-	"evm-api/transaction"
+	"evm-api/signature"
 	"log"
 	"os"
 
@@ -27,9 +27,9 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	if err := transaction.EstimateGas(https); err != nil {
-		log.Fatal(err.Error())
-	}
+	// if err := transaction.EstimateGas(https); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	// if err := account.GenerateMnemonic(); err != nil {
 	// 	log.Fatal(err.Error())
@@ -93,7 +93,9 @@ func main() {
 	// 0x93ed284eaf3e0ae96b83c4dcb3a2a2b45acd8f6c638a1a354f272ff8d6f90fe4
 	// 0x5d3b42b79c37d7abee044cd47ae0e51e7e28d5d753c6dd07458f812894201b23
 	// 0x04fa6f2064697037717cfe7983d525ca6b13884492ed4f05c122b7a3d98ed747
-	// if err := transaction.QueryTxn(https, "0x04fa6f2064697037717cfe7983d525ca6b13884492ed4f05c122b7a3d98ed747"); err != nil {
+
+	// arise: 0x52d07fa5dfb3580885bc9c31ad17a908269a489eacccc9f35a28b725d11da06e
+	// if err := transaction.QueryTxn(https, "0x52d07fa5dfb3580885bc9c31ad17a908269a489eacccc9f35a28b725d11da06e"); err != nil {
 	// 	log.Fatal(err.Error())
 	// }
 
@@ -145,23 +147,23 @@ func main() {
 	// smartcontract.GetBalance(https)
 
 	// generate & verify signature
-	// 	sign, err := signature.GenerateSignature([]byte("bobo"))
-	// 	if err != nil {
-	// 		log.Fatal(err.Error())
-	// 	}
+	// sign, err := signature.GenerateSignature([]byte("Hello, world!"))
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
-	// 	if err := signature.VerifySignature([]byte("bobo"), sign); err != nil {
-	// 		log.Fatal(err.Error())
-	// 	}
+	// if err := signature.VerifySignature([]byte("Hello, world!"), sign); err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
-	// 	signWithEIP191, err := signature.GenerateSignatureWihEIP191("bobo")
-	// 	if err != nil {
-	// 		log.Fatal(err.Error())
-	// 	}
+	// signWithEIP191, err := signature.GenerateSignatureWihEIP191("Hello, world!")
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
-	// 	if err := signature.VerifySignatureWithEIP191("bobo", signWithEIP191); err != nil {
-	// 		log.Fatal(err.Error())
-	// 	}
+	if err := signature.VerifySignatureWithEIP191("Hello, world!", "0xd542186b227eb5b9c419088f0892bedcd46899f7cc7c529eb604172430fe36f1740e3c4380ada7bc5946ab64fb6efdb637fa6fae74dfe9452ed903fbc250fca61c"); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// 	// use third-party lib to verify
 	// 	// standard

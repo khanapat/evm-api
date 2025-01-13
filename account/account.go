@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"crypto/ecdsa"
+	"errors"
 	"evm-api/util"
 	"fmt"
 	"log"
@@ -60,6 +61,26 @@ func GenerateMnemonic() error {
 		return err
 	}
 
+	privateKey, err := wallet.PrivateKey(account)
+	if err != nil {
+		return err
+	}
+
+	privateKeyBytes := crypto.FromECDSA(privateKey)
+	privateKeyHex := hexutil.Encode(privateKeyBytes)[2:]
+
+	publicKeyECDSA, ok := privateKey.Public().(*ecdsa.PublicKey)
+	if !ok {
+		return errors.New("public key ecdsa error")
+	}
+	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
+	publicKeyHex := hexutil.Encode(publicKeyBytes)[4:]
+
+	fmt.Println("Private key:", privateKeyHex)
+	fmt.Println("Public key:", publicKeyHex)
+	// public key --> address (the last 20 bytes of keccak256 hash of public key and adding 0x)
+	// hexutil.Decode(0x + publicKeyHex) is to convert hex string to byte array
+	// crypto.Keccak256() is to hash the byte array and select the last 20 bytes and add 0x
 	fmt.Println("Account1:", account.Address.Hex()) // account 1
 
 	path = hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/1")
@@ -142,6 +163,7 @@ func Balance(client *ethclient.Client, address string) error {
 	fmt.Println("discount amount(wei):", dAmountInWei)
 	fmt.Println("discount amount(eth):", util.WeiToEther(dAmountInWei))
 
+	// convert big int to big float
 	dString := new(big.Float)
 	dString.SetString(dAmountInWei.String())
 	fmt.Println("discount set string", dString)
@@ -150,19 +172,19 @@ func Balance(client *ethclient.Client, address string) error {
 	fmt.Println("discount set int (more precise)", dInt)
 
 	// https://stackoverflow.com/questions/46374304/dealing-with-floating-point-number-precision-in-go-arithmetic
-	// // const prec = 200
-	// init := big.NewFloat(4.0).SetPrec(200)
-	// // init, _ := new(big.Float).SetString("4.0")
-	// result1 := new(big.Float)
-	// result1.Mul(init, big.NewFloat(5)).Quo(result1, big.NewFloat(100))
-	// fmt.Println(result1)
+	// const prec = 200
+	init := big.NewFloat(4.0).SetPrec(200)
+	// init, _ := new(big.Float).SetString("4.0")
+	result1 := new(big.Float)
+	result1.Mul(init, big.NewFloat(5)).Quo(result1, big.NewFloat(100))
+	fmt.Println(result1)
 
-	// result2 := new(big.Float)
-	// result2.Mul(init, big.NewFloat(10)).Quo(result2, big.NewFloat(100))
-	// fmt.Println(result2)
+	result2 := new(big.Float)
+	result2.Mul(init, big.NewFloat(10)).Quo(result2, big.NewFloat(100))
+	fmt.Println(result2)
 
-	// fmt.Println(init.Add(init, result1).Float64())
-	// fmt.Println(init.Add(init, result2).Float64())
+	fmt.Println(init.Add(init, result1).Float64())
+	fmt.Println(init.Add(init, result2).Float64())
 
 	return nil
 }

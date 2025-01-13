@@ -118,7 +118,7 @@ func QueryTxn(client *ethclient.Client, hash string) error {
 		fmt.Println("Gas Tip in gwei:", util.ToDecimal(tx.GasTipCap(), 9)) // in eth use 18
 
 		gasPrice := big.NewInt(0).Add(block.BaseFee(), tx.GasTipCap())
-		if gasPrice.Cmp(tx.GasPrice()) == 1 { // if base fee + tip > max gas fee, use max gas fee
+		if gasPrice.Cmp(tx.GasPrice()) == 1 { // if base fee + tip > max gas fee, use max gas fee (effective gas price)
 			gasPrice = tx.GasPrice()
 		}
 		fmt.Println("Gas Price in wei:", gasPrice)                     // base fee + tip or max gas fee
